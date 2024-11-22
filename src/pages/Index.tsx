@@ -1,4 +1,4 @@
-import { Users, FileContract, ShoppingCart, TrendingUp } from "lucide-react";
+import { Users, FileText, ShoppingCart, TrendingUp } from "lucide-react";
 import Sidebar from "@/components/ui/dashboard/Sidebar";
 import StatCard from "@/components/ui/dashboard/StatCard";
 import RecentActivity from "@/components/ui/dashboard/RecentActivity";
@@ -14,7 +14,7 @@ const Index = () => {
     {
       title: "Active Contracts",
       value: "43",
-      icon: <FileContract className="w-6 h-6 text-primary" />,
+      icon: <FileText className="w-6 h-6 text-primary" />,
       trend: { value: 8, isPositive: true },
     },
     {
@@ -45,7 +45,6 @@ const Index = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <RecentActivity />
-            {/* Additional dashboard widgets can be added here */}
           </div>
         </div>
       </main>

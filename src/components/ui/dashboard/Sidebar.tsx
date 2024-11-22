@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users, 
-  FileContract, 
+  FileText, 
   ShoppingCart,
   Bell,
   Wallet,
@@ -13,7 +13,7 @@ const Sidebar = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/" },
     { icon: Users, label: "Buyers & Suppliers", path: "/users" },
-    { icon: FileContract, label: "Contracts", path: "/contracts" },
+    { icon: FileText, label: "Contracts", path: "/contracts" },
     { icon: ShoppingCart, label: "Orders", path: "/orders" },
     { icon: Bell, label: "Notifications", path: "/notifications" },
     { icon: Wallet, label: "Finance", path: "/finance" },
