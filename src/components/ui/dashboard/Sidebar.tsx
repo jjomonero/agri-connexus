@@ -1,41 +1,48 @@
-import { Link } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Users, 
-  FileText, 
+import { NavLink } from "react-router-dom";
+import {
+  Users,
+  FileText,
   ShoppingCart,
   Bell,
-  Wallet,
-  Settings
+  DollarSign,
+  Settings,
+  Package,
+  LayoutDashboard,
 } from "lucide-react";
 
 const Sidebar = () => {
-  const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-    { icon: Users, label: "Buyers & Suppliers", path: "/users" },
-    { icon: FileText, label: "Contracts", path: "/contracts" },
-    { icon: ShoppingCart, label: "Orders", path: "/orders" },
-    { icon: Bell, label: "Notifications", path: "/notifications" },
-    { icon: Wallet, label: "Finance", path: "/finance" },
-    { icon: Settings, label: "Settings", path: "/settings" },
+  const links = [
+    { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { to: "/users", icon: Users, label: "Users" },
+    { to: "/contracts", icon: FileText, label: "Contracts" },
+    { to: "/orders", icon: ShoppingCart, label: "Orders" },
+    { to: "/inventory", icon: Package, label: "Inventory" },
+    { to: "/notifications", icon: Bell, label: "Notifications" },
+    { to: "/finance", icon: DollarSign, label: "Finance" },
+    { to: "/settings", icon: Settings, label: "Settings" },
   ];
 
   return (
-    <div className="h-screen w-64 bg-white border-r border-gray-200 p-4 fixed left-0 top-0">
-      <div className="flex items-center gap-2 mb-8 px-2">
-        <div className="w-8 h-8 bg-primary rounded-lg"></div>
-        <h1 className="text-xl font-bold text-primary">AgriConnect</h1>
+    <div className="fixed left-0 top-0 w-64 h-full bg-white border-r border-gray-200 p-4">
+      <div className="flex items-center mb-8">
+        <h1 className="text-xl font-bold">AgriConnexus</h1>
       </div>
-      <nav>
-        {menuItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className="flex items-center gap-3 px-2 py-3 text-gray-700 hover:bg-primary-light rounded-lg transition-colors"
+      <nav className="space-y-2">
+        {links.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+                isActive
+                  ? "bg-primary text-primary-foreground"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`
+            }
           >
-            <item.icon className="w-5 h-5" />
-            <span>{item.label}</span>
-          </Link>
+            <link.icon className="w-5 h-5" />
+            {link.label}
+          </NavLink>
         ))}
       </nav>
     </div>

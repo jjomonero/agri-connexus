@@ -12,6 +12,7 @@ import Orders from "./pages/Orders";
 import Notifications from "./pages/Notifications";
 import Finance from "./pages/Finance";
 import Settings from "./pages/Settings";
+import Inventory from "./pages/Inventory";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/inventory" element={<Inventory />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
