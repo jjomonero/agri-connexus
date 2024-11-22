@@ -3,8 +3,8 @@ import Sidebar from "@/components/ui/dashboard/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Filter, Eye, Truck } from "lucide-react";
+import OrdersTable from "@/components/ui/dashboard/OrdersTable";
+import { Search, Filter } from "lucide-react";
 
 const Orders = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,7 +28,6 @@ const Orders = () => {
       status: "Delivered",
       date: "2024-02-14",
     },
-    // Add more mock data as needed
   ];
 
   return (
@@ -55,7 +54,10 @@ const Orders = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
                   <Filter className="w-4 h-4" /> Filters
                 </Button>
               </div>
@@ -64,51 +66,7 @@ const Orders = () => {
 
           <Card>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Buyer</TableHead>
-                    <TableHead>Supplier</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>{order.buyer}</TableCell>
-                      <TableCell>{order.supplier}</TableCell>
-                      <TableCell>{order.items}</TableCell>
-                      <TableCell>{order.total}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          order.status === "Delivered" 
-                            ? "bg-green-100 text-green-800"
-                            : order.status === "In Transit"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}>
-                          {order.status}
-                        </span>
-                      </TableCell>
-                      <TableCell>{order.date}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                          <Eye className="w-4 h-4" /> View
-                        </Button>
-                        <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                          <Truck className="w-4 h-4" /> Track
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <OrdersTable orders={orders} />
             </CardContent>
           </Card>
         </div>
