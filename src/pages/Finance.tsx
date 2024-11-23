@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowUpRight, ArrowDownRight, DollarSign, Wallet, TrendingUp, Download } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import TransactionDetails from "@/components/ui/finance/TransactionDetails";
 
 interface Transaction {
   id: string;
@@ -15,10 +16,29 @@ interface Transaction {
   status: "pending" | "completed" | "failed";
   date: string;
   contractId?: string;
+  products: {
+    id: string;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    total: number;
+  }[];
+  parties: {
+    id: string;
+    name: string;
+    role: string;
+    percentage: number;
+    amount: number;
+  }[];
+  profitMargin: number;
+  totalAmount: number;
+  fees: number;
+  notes?: string;
 }
 
 const Finance = () => {
   const { user } = useAuth();
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: "1",
@@ -27,7 +47,43 @@ const Finance = () => {
       amount: "R$ 2.500,00",
       status: "completed",
       date: "2024-02-15",
-      contractId: "123"
+      contractId: "123",
+      products: [
+        {
+          id: "1",
+          name: "Produto A",
+          quantity: 10,
+          unitPrice: 150,
+          total: 1500
+        },
+        {
+          id: "2",
+          name: "Produto B",
+          quantity: 5,
+          unitPrice: 200,
+          total: 1000
+        }
+      ],
+      parties: [
+        {
+          id: "1",
+          name: "Empresa ABC",
+          role: "supplier",
+          percentage: 70,
+          amount: 1750
+        },
+        {
+          id: "2",
+          name: "Cliente XYZ",
+          role: "buyer",
+          percentage: 30,
+          amount: 750
+        }
+      ],
+      profitMargin: 15.5,
+      totalAmount: 2500,
+      fees: 125,
+      notes: "Transação realizada com sucesso após aprovação do contrato."
     },
     {
       id: "2",
@@ -35,7 +91,12 @@ const Finance = () => {
       type: "expense",
       amount: "R$ 150,00",
       status: "completed",
-      date: "2024-02-15"
+      date: "2024-02-15",
+      products: [],
+      parties: [],
+      profitMargin: 0,
+      totalAmount: 150,
+      fees: 0
     },
   ]);
 
@@ -134,7 +195,11 @@ const Finance = () => {
                     </TableHeader>
                     <TableBody>
                       {transactions.map((transaction) => (
-                        <TableRow key={transaction.id}>
+                        <TableRow 
+                          key={transaction.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => setSelectedTransaction(transaction)}
+                        >
                           <TableCell className="font-medium">
                             {transaction.description}
                           </TableCell>
@@ -172,7 +237,10 @@ const Finance = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => updateTransactionStatus(transaction.id, "completed")}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateTransactionStatus(transaction.id, "completed");
+                              }}
                               disabled={transaction.status === "completed"}
                             >
                               Atualizar Status
@@ -188,6 +256,13 @@ const Finance = () => {
           </Card>
         </div>
       </main>
+      {selectedTransaction && (
+        <TransactionDetails
+          transaction={selectedTransaction}
+          open={!!selectedTransaction}
+          onClose={() => setSelectedTransaction(null)}
+        />
+      )}
     </div>
   );
 };
