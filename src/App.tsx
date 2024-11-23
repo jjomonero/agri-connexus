@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ui/auth/ProtectedRoute";
 
 // Pages
 import Index from "./pages/Index";
@@ -13,27 +15,87 @@ import Notifications from "./pages/Notifications";
 import Finance from "./pages/Finance";
 import Settings from "./pages/Settings";
 import Inventory from "./pages/Inventory";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/contracts" element={<Contracts />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/finance" element={<Finance />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/inventory" element={<Inventory />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute allowedRoles={["administrator", "supplier", "buyer"]}>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute allowedRoles={["administrator"]}>
+                  <Users />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/contracts"
+              element={
+                <ProtectedRoute allowedRoles={["administrator", "supplier", "buyer"]}>
+                  <Contracts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute allowedRoles={["administrator", "supplier", "buyer"]}>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute allowedRoles={["administrator", "supplier", "buyer"]}>
+                  <Notifications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finance"
+              element={
+                <ProtectedRoute allowedRoles={["administrator"]}>
+                  <Finance />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute allowedRoles={["administrator", "supplier", "buyer"]}>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={
+                <ProtectedRoute allowedRoles={["administrator", "supplier"]}>
+                  <Inventory />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
