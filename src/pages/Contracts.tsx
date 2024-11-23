@@ -20,11 +20,13 @@ import {
 import { Search, Plus, Filter, FileText, Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import ContractForm from "@/components/ui/dashboard/ContractForm";
+import ContractViewer from "@/components/ui/dashboard/ContractViewer";
 
 const Contracts = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<any>(null);
 
   const contracts = [
     {
@@ -36,7 +38,18 @@ const Contracts = () => {
       endDate: "2024-03-31",
       status: "Ativo",
       type: "Fornecimento",
-      value: "R$ 150.000,00"
+      value: "R$ 150.000,00",
+      pdfUrl: "/contracts/sample-contract.pdf",
+      signatures: {
+        buyer: {
+          name: "João Silva",
+          date: "2024-01-01 14:30:00",
+        },
+        supplier: {
+          name: "Maria Santos",
+          date: "2024-01-01 15:45:00",
+        },
+      },
     },
     {
       id: 2,
@@ -53,6 +66,10 @@ const Contracts = () => {
 
   const handleNewContract = () => {
     setShowForm(true);
+  };
+
+  const handleViewContract = (contract: any) => {
+    setSelectedContract(contract);
   };
 
   return (
@@ -82,10 +99,7 @@ const Contracts = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
+                <Button variant="outline" className="flex items-center gap-2">
                   <Filter className="w-4 h-4" /> Filtros
                 </Button>
               </div>
@@ -137,6 +151,7 @@ const Contracts = () => {
                             variant="ghost"
                             size="sm"
                             className="flex items-center gap-1"
+                            onClick={() => handleViewContract(contract)}
                           >
                             <FileText className="w-4 h-4" /> Ver
                           </Button>
@@ -164,6 +179,16 @@ const Contracts = () => {
               <ContractForm onClose={() => setShowForm(false)} />
             </DialogContent>
           </Dialog>
+
+          {selectedContract && (
+            <ContractViewer
+              contractId={selectedContract.id}
+              contractUrl={selectedContract.pdfUrl}
+              isOpen={!!selectedContract}
+              onClose={() => setSelectedContract(null)}
+              signatures={selectedContract.signatures}
+            />
+          )}
         </div>
       </main>
     </div>
