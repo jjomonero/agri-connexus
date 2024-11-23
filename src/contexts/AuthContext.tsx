@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 export type UserRole = "supplier" | "buyer" | "administrator";
 
@@ -11,7 +11,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, role: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -21,13 +21,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = async (email: string, password: string) => {
-    // Mock login - replace with actual authentication logic
+  const login = async (email: string, password: string, role: string) => {
+    // Mock login - substituir pela lógica real de autenticação
     const mockUser: User = {
       id: "1",
-      name: "John Doe",
+      name: role === "administrator" ? "Admin" : role === "supplier" ? "Fornecedor" : "Comprador",
       email: email,
-      role: "administrator", // This would come from your backend
+      role: role as UserRole,
     };
     setUser(mockUser);
   };

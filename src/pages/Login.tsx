@@ -4,6 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
@@ -12,20 +19,21 @@ const Login = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await login(email, password, selectedRole);
       navigate("/");
       toast({
-        title: "Login successful",
-        description: "Welcome back!",
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo de volta!",
       });
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again.",
+        title: "Falha no login",
+        description: "Por favor, verifique suas credenciais e tente novamente.",
         variant: "destructive",
       });
     }
@@ -53,7 +61,7 @@ const Login = () => {
             </div>
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                Senha
               </label>
               <Input
                 id="password"
@@ -63,8 +71,23 @@ const Login = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
-              Login
+            <div className="space-y-2">
+              <label htmlFor="role" className="text-sm font-medium">
+                Tipo de Usuário
+              </label>
+              <Select required onValueChange={setSelectedRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione seu tipo de usuário" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="supplier">Fornecedor</SelectItem>
+                  <SelectItem value="buyer">Comprador</SelectItem>
+                  <SelectItem value="administrator">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button type="submit" className="w-full" disabled={!selectedRole}>
+              Entrar
             </Button>
           </form>
         </CardContent>
