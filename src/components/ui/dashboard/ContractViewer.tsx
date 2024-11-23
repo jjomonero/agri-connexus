@@ -99,6 +99,7 @@ const ContractViewer = ({
         <DialogHeader>
           <DialogTitle>Visualização do Contrato</DialogTitle>
         </DialogHeader>
+        
         <div className="flex flex-col h-full">
           <div className="flex-1 overflow-auto">
             <Document
@@ -110,56 +111,57 @@ const ContractViewer = ({
             </Document>
           </div>
 
-        <div className="flex justify-between items-center mt-4 pt-4 border-t">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
-              disabled={pageNumber <= 1}
-            >
-              Anterior
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
-              disabled={pageNumber >= numPages}
-            >
-              Próxima
-            </Button>
-            <span className="self-center text-sm text-muted-foreground">
-              Página {pageNumber} de {numPages}
-            </span>
+          <div className="flex justify-between items-center mt-4 pt-4 border-t">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
+                disabled={pageNumber <= 1}
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
+                disabled={pageNumber >= numPages}
+              >
+                Próxima
+              </Button>
+              <span className="self-center text-sm text-muted-foreground">
+                Página {pageNumber} de {numPages}
+              </span>
+            </div>
+
+            {(user?.role === "buyer" || user?.role === "supplier") && 
+             !signatures?.[user.role] && (
+              <Button onClick={handleSignContract} disabled={loading}>
+                {loading ? "Processando..." : "Assinar Digitalmente"}
+              </Button>
+            )}
           </div>
 
-          {(user?.role === "buyer" || user?.role === "supplier") && 
-           !signatures?.[user.role] && (
-            <Button onClick={handleSignContract} disabled={loading}>
-              {loading ? "Processando..." : "Assinar Digitalmente"}
-            </Button>
+          {signatures && Object.keys(signatures).length > 0 && (
+            <div className="mt-4 pt-4 border-t">
+              <h4 className="text-sm font-semibold mb-2">Assinaturas:</h4>
+              <div className="grid grid-cols-2 gap-4">
+                {signatures.buyer && (
+                  <div className="text-sm">
+                    <p className="font-medium">Comprador:</p>
+                    <p>{signatures.buyer.name}</p>
+                    <p className="text-muted-foreground">{signatures.buyer.date}</p>
+                  </div>
+                )}
+                {signatures.supplier && (
+                  <div className="text-sm">
+                    <p className="font-medium">Fornecedor:</p>
+                    <p>{signatures.supplier.name}</p>
+                    <p className="text-muted-foreground">{signatures.supplier.date}</p>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
-
-        {signatures && Object.keys(signatures).length > 0 && (
-          <div className="mt-4 pt-4 border-t">
-            <h4 className="text-sm font-semibold mb-2">Assinaturas:</h4>
-            <div className="grid grid-cols-2 gap-4">
-              {signatures.buyer && (
-                <div className="text-sm">
-                  <p className="font-medium">Comprador:</p>
-                  <p>{signatures.buyer.name}</p>
-                  <p className="text-muted-foreground">{signatures.buyer.date}</p>
-                </div>
-              )}
-              {signatures.supplier && (
-                <div className="text-sm">
-                  <p className="font-medium">Fornecedor:</p>
-                  <p>{signatures.supplier.name}</p>
-                  <p className="text-muted-foreground">{signatures.supplier.date}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );
