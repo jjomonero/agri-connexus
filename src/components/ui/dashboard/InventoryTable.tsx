@@ -18,6 +18,7 @@ interface Product {
   unit: string;
   price: number;
   lastUpdated: string;
+  reserved?: number;
 }
 
 const InventoryTable = () => {
@@ -30,6 +31,7 @@ const InventoryTable = () => {
       unit: "kg",
       price: 4.99,
       lastUpdated: "2024-03-15",
+      reserved: 50,
     },
     {
       id: "2",
@@ -38,6 +40,7 @@ const InventoryTable = () => {
       unit: "unit",
       price: 2.50,
       lastUpdated: "2024-03-15",
+      reserved: 30,
     },
   ]);
 
@@ -49,8 +52,8 @@ const InventoryTable = () => {
           : Math.max(0, product.quantity - 1);
         
         toast({
-          title: "Stock Updated",
-          description: `${product.name} stock ${type === 'increase' ? 'increased' : 'decreased'} to ${newQuantity} ${product.unit}`,
+          title: "Estoque Atualizado",
+          description: `${product.name} estoque ${type === 'increase' ? 'aumentado' : 'diminuído'} para ${newQuantity} ${product.unit}`,
         });
 
         return {
@@ -68,8 +71,8 @@ const InventoryTable = () => {
     if (product) {
       setProducts(products.filter(p => p.id !== productId));
       toast({
-        title: "Product Removed",
-        description: `${product.name} has been removed from inventory.`,
+        title: "Produto Removido",
+        description: `${product.name} foi removido do inventário.`,
       });
     }
   };
@@ -78,12 +81,13 @@ const InventoryTable = () => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Product Name</TableHead>
-          <TableHead>Quantity</TableHead>
-          <TableHead>Unit</TableHead>
-          <TableHead>Price (R$)</TableHead>
-          <TableHead>Last Updated</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead>Nome do Produto</TableHead>
+          <TableHead>Quantidade Disponível</TableHead>
+          <TableHead>Quantidade Reservada</TableHead>
+          <TableHead>Unidade</TableHead>
+          <TableHead>Preço (R$)</TableHead>
+          <TableHead>Última Atualização</TableHead>
+          <TableHead>Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -91,6 +95,7 @@ const InventoryTable = () => {
           <TableRow key={product.id}>
             <TableCell className="font-medium">{product.name}</TableCell>
             <TableCell>{product.quantity}</TableCell>
+            <TableCell>{product.reserved || 0}</TableCell>
             <TableCell>{product.unit}</TableCell>
             <TableCell>{product.price.toFixed(2)}</TableCell>
             <TableCell>{product.lastUpdated}</TableCell>
