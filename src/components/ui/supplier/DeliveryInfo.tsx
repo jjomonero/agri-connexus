@@ -35,7 +35,11 @@ const DeliveryInfo = ({ initialData, onChange }: DeliveryInfoProps) => {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    onChange(values);
+    onChange({
+      hasOwnVehicle: values.hasOwnVehicle,
+      capacity: values.capacity,
+      maxDistance: values.maxDistance,
+    });
   };
 
   return (
