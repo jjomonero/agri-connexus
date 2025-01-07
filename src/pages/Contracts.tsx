@@ -79,27 +79,12 @@ const Contracts = () => {
 
   const handleViewContract = (contract: Contract) => {
     setSelectedContract({
-      id: contract.id,
-      url: `https://api.example.com/contracts/${contract.id}/pdf`, // Replace with your actual URL generation logic
+      ...contract,
       signatures: {
-        buyer: contract.signatures?.buyerId ? {
-          name: contract.parties.find(p => p.role === "buyer")?.name || "",
-          date: contract.signatures.signedAt || ""
-        } : undefined,
-        supplier: contract.signatures?.supplierId ? {
-          name: contract.parties.find(p => p.role === "supplier")?.name || "",
-          date: contract.signatures.signedAt || ""
-        } : undefined
-      },
-      contractDetails: {
-        products: contract.products.map(p => ({
-          id: p.id,
-          name: p.name,
-          quantity: p.quantity,
-          unit: p.unit
-        })),
-        deliveryDate: contract.deliverySchedule.startDate,
-        deliveryAddress: "Address" // Add this to your Contract type if needed
+        buyerId: contract.signatures?.buyerId,
+        supplierId: contract.signatures?.supplierId,
+        platformId: contract.signatures?.platformId,
+        signedAt: contract.signatures?.signedAt
       }
     });
   };
@@ -256,11 +241,29 @@ const Contracts = () => {
           {selectedContract && (
             <ContractViewer
               contractId={Number(selectedContract.id)}
-              contractUrl={selectedContract.url}
+              contractUrl={`https://api.example.com/contracts/${selectedContract.id}/pdf`}
               isOpen={!!selectedContract}
               onClose={() => setSelectedContract(null)}
-              signatures={selectedContract.signatures}
-              contractDetails={selectedContract.contractDetails}
+              signatures={{
+                buyer: selectedContract.signatures?.buyerId ? {
+                  name: selectedContract.parties.find(p => p.role === "buyer")?.name || "",
+                  date: selectedContract.signatures.signedAt || ""
+                } : undefined,
+                supplier: selectedContract.signatures?.supplierId ? {
+                  name: selectedContract.parties.find(p => p.role === "supplier")?.name || "",
+                  date: selectedContract.signatures.signedAt || ""
+                } : undefined
+              }}
+              contractDetails={{
+                products: selectedContract.products.map(p => ({
+                  id: p.id,
+                  name: p.name,
+                  quantity: p.quantity,
+                  unit: p.unit
+                })),
+                deliveryDate: selectedContract.deliverySchedule.startDate,
+                deliveryAddress: "Address" // Using a default value since it's required by the interface
+              }}
             />
           )}
         </div>

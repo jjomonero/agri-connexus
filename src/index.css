@@ -181,8 +181,9 @@
   @apply truncate;
 }
 
+/* Using the utility class directly instead of @apply */
 .break-words {
-  @apply break-words;
+  word-wrap: break-word;
 }
 
 /* Improved touch targets for mobile */
