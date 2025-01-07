@@ -19,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
-import { Supplier } from "@/types/supplier";
+import { useToast } from "@/hooks/use-toast";
+import { Supplier, SupplierFormData } from "@/types/supplier";
 import ProductList from "./ProductList";
 import DeliveryInfo from "./DeliveryInfo";
 import AvailabilitySchedule from "./AvailabilitySchedule";
@@ -40,8 +40,10 @@ interface SupplierFormProps {
 const SupplierForm = ({ onSubmit, initialData }: SupplierFormProps) => {
   const { toast } = useToast();
   const [products, setProducts] = useState(initialData?.products || []);
+  const [vehicle, setVehicle] = useState(initialData?.vehicle);
+  const [availability, setAvailability] = useState(initialData?.availability);
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<SupplierFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -56,6 +58,8 @@ const SupplierForm = ({ onSubmit, initialData }: SupplierFormProps) => {
       await onSubmit({
         ...values,
         products,
+        vehicle,
+        availability,
         status: "pending",
       });
       
@@ -164,12 +168,12 @@ const SupplierForm = ({ onSubmit, initialData }: SupplierFormProps) => {
 
         <DeliveryInfo
           initialData={initialData?.vehicle}
-          onChange={(vehicle) => form.setValue("vehicle", vehicle)}
+          onChange={setVehicle}
         />
 
         <AvailabilitySchedule
           initialData={initialData?.availability}
-          onChange={(availability) => form.setValue("availability", availability)}
+          onChange={setAvailability}
         />
 
         <div className="flex justify-end gap-4">

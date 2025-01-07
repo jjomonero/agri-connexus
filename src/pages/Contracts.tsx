@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -18,58 +19,86 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search, Plus, Filter, FileText, Download } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import ContractForm from "@/components/ui/dashboard/ContractForm";
 import ContractViewer from "@/components/ui/dashboard/ContractViewer";
+import { Contract, ContractType } from "@/types/contract";
 
 const Contracts = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [selectedContract, setSelectedContract] = useState<any>(null);
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [contractType, setContractType] = useState<ContractType>("buyer");
 
   const contracts = [
     {
-      id: 1,
+      id: "1",
       title: "Acordo de Fornecimento - Q1 2024",
-      buyer: "Green Market",
-      supplier: "Farm Fresh Co.",
-      startDate: "2024-01-01",
-      endDate: "2024-03-31",
-      status: "Ativo",
-      type: "Fornecimento",
-      value: "R$ 150.000,00",
-      pdfUrl: "/contracts/sample-contract.pdf",
-      signatures: {
-        buyer: {
-          name: "João Silva",
-          date: "2024-01-01 14:30:00",
-        },
-        supplier: {
-          name: "Maria Santos",
-          date: "2024-01-01 15:45:00",
-        },
+      parties: [
+        { id: "1", name: "Green Market", role: "buyer" as const, responsibilities: [] },
+        { id: "2", name: "Farm Fresh Co.", role: "supplier" as const, responsibilities: [] }
+      ],
+      products: [
+        {
+          id: "1",
+          name: "Tomate Orgânico",
+          quantity: 100,
+          price: 5.99,
+          total: 599,
+          unit: "kg"
+        }
+      ],
+      status: "active" as const,
+      totalAmount: 599,
+      createdAt: "2024-01-01",
+      updatedAt: "2024-01-01",
+      paymentTerms: {
+        method: "cash" as const,
+        dueDate: "2024-03-31",
+        totalAmount: 599
       },
-    },
-    {
-      id: 2,
-      title: "Contrato de Produção Sazonal",
-      buyer: "Fresh Foods Ltd",
-      supplier: "Organic Farms",
-      startDate: "2024-02-01",
-      endDate: "2024-07-31",
-      status: "Pendente",
-      type: "Produção",
-      value: "R$ 280.000,00"
-    },
+      deliverySchedule: {
+        frequency: "weekly" as const,
+        startDate: "2024-01-01",
+        endDate: "2024-03-31"
+      },
+      penalties: {
+        lateDeliveryFee: 50,
+        qualityIssueFee: 100,
+        contractBreachFee: 500,
+        latePenaltyPercentage: 2
+      }
+    }
   ];
 
-  const handleNewContract = () => {
+  const handleNewContract = (type: ContractType) => {
+    setContractType(type);
     setShowForm(true);
   };
 
-  const handleViewContract = (contract: any) => {
+  const handleViewContract = (contract: Contract) => {
     setSelectedContract(contract);
+  };
+
+  const handleCreateContract = async (data: Partial<Contract>) => {
+    try {
+      // Here you would make an API call to create the contract
+      console.log("Creating contract:", data);
+      
+      toast({
+        title: "Contrato criado com sucesso",
+        description: "O contrato foi enviado para aprovação.",
+      });
+      
+      setShowForm(false);
+    } catch (error) {
+      toast({
+        title: "Erro ao criar contrato",
+        description: "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -79,9 +108,14 @@ const Contracts = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold">Contratos</h1>
-            <Button className="flex items-center gap-2" onClick={handleNewContract}>
-              <Plus className="w-4 h-4" /> Novo Contrato
-            </Button>
+            <div className="flex gap-4">
+              <Button onClick={() => handleNewContract("buyer")} className="flex items-center gap-2">
+                <Plus className="w-4 h-4" /> Novo Contrato de Compra
+              </Button>
+              <Button onClick={() => handleNewContract("supplier")} variant="outline" className="flex items-center gap-2">
+                <Plus className="w-4 h-4" /> Novo Contrato de Fornecimento
+              </Button>
+            </div>
           </div>
 
           <Card className="mb-8">
@@ -114,8 +148,7 @@ const Contracts = () => {
                     <TableHead>Título do Contrato</TableHead>
                     <TableHead>Comprador</TableHead>
                     <TableHead>Fornecedor</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Valor</TableHead>
+                    <TableHead>Valor Total</TableHead>
                     <TableHead>Data Início</TableHead>
                     <TableHead>Data Fim</TableHead>
                     <TableHead>Status</TableHead>
@@ -128,21 +161,29 @@ const Contracts = () => {
                       <TableCell className="font-medium">
                         {contract.title}
                       </TableCell>
-                      <TableCell>{contract.buyer}</TableCell>
-                      <TableCell>{contract.supplier}</TableCell>
-                      <TableCell>{contract.type}</TableCell>
-                      <TableCell>{contract.value}</TableCell>
-                      <TableCell>{contract.startDate}</TableCell>
-                      <TableCell>{contract.endDate}</TableCell>
+                      <TableCell>
+                        {contract.parties.find(p => p.role === "buyer")?.name}
+                      </TableCell>
+                      <TableCell>
+                        {contract.parties.find(p => p.role === "supplier")?.name}
+                      </TableCell>
+                      <TableCell>
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(contract.totalAmount)}
+                      </TableCell>
+                      <TableCell>{contract.deliverySchedule.startDate}</TableCell>
+                      <TableCell>{contract.deliverySchedule.endDate}</TableCell>
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
-                            contract.status === "Ativo"
+                            contract.status === "active"
                               ? "bg-green-100 text-green-800"
                               : "bg-yellow-100 text-yellow-800"
                           }`}
                         >
-                          {contract.status}
+                          {contract.status === "active" ? "Ativo" : "Pendente"}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -172,21 +213,28 @@ const Contracts = () => {
           </Card>
 
           <Dialog open={showForm} onOpenChange={setShowForm}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-4xl">
               <DialogHeader>
-                <DialogTitle>Novo Contrato</DialogTitle>
+                <DialogTitle>
+                  {contractType === "buyer" ? "Novo Contrato de Compra" : "Novo Contrato de Fornecimento"}
+                </DialogTitle>
+                <DialogDescription>
+                  Preencha os dados do contrato para {contractType === "buyer" ? "compra" : "fornecimento"} de produtos
+                </DialogDescription>
               </DialogHeader>
-              <ContractForm onClose={() => setShowForm(false)} />
+              <ContractForm
+                type={contractType}
+                onSubmit={handleCreateContract}
+                onClose={() => setShowForm(false)}
+              />
             </DialogContent>
           </Dialog>
 
           {selectedContract && (
             <ContractViewer
-              contractId={selectedContract.id}
-              contractUrl={selectedContract.pdfUrl}
+              contract={selectedContract}
               isOpen={!!selectedContract}
               onClose={() => setSelectedContract(null)}
-              signatures={selectedContract.signatures}
             />
           )}
         </div>

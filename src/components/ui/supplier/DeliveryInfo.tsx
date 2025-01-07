@@ -1,108 +1,76 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { DeliveryVehicle } from "@/types/supplier";
 
-const formSchema = z.object({
-  hasOwnVehicle: z.boolean(),
-  capacity: z.number().min(0),
-  maxDistance: z.number().min(0),
-});
-
 interface DeliveryInfoProps {
   initialData?: DeliveryVehicle;
-  onChange: (data: DeliveryVehicle) => void;
+  onChange: (vehicle: DeliveryVehicle) => void;
 }
 
 const DeliveryInfo = ({ initialData, onChange }: DeliveryInfoProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      hasOwnVehicle: initialData?.hasOwnVehicle || false,
-      capacity: initialData?.capacity || 0,
-      maxDistance: initialData?.maxDistance || 0,
-    },
-  });
+  const [hasOwnVehicle, setHasOwnVehicle] = useState(initialData?.hasOwnVehicle || false);
+  const [capacity, setCapacity] = useState(initialData?.capacity || 0);
+  const [maxDistance, setMaxDistance] = useState(initialData?.maxDistance || 0);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    onChange({
-      hasOwnVehicle: values.hasOwnVehicle,
-      capacity: values.capacity,
-      maxDistance: values.maxDistance,
-    });
+  const handleChange = (field: keyof DeliveryVehicle, value: any) => {
+    const updatedData = {
+      hasOwnVehicle,
+      capacity,
+      maxDistance,
+      [field]: value,
+    };
+    
+    if (field === "hasOwnVehicle") {
+      setHasOwnVehicle(value);
+    } else if (field === "capacity") {
+      setCapacity(Number(value));
+    } else if (field === "maxDistance") {
+      setMaxDistance(Number(value));
+    }
+
+    onChange(updatedData);
   };
 
   return (
-    <Form {...form}>
-      <form onChange={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="hasOwnVehicle"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between">
-              <FormLabel>Possui veículo próprio?</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Informações de Entrega</h3>
+      
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="hasOwnVehicle"
+          checked={hasOwnVehicle}
+          onCheckedChange={(checked) => handleChange("hasOwnVehicle", checked)}
         />
+        <Label htmlFor="hasOwnVehicle">Possui veículo próprio</Label>
+      </div>
 
-        {form.watch("hasOwnVehicle") && (
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="capacity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Capacidade do Veículo (kg)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="maxDistance"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Distância Máxima (km)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+      {hasOwnVehicle && (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="capacity">Capacidade de Carga (kg)</Label>
+            <Input
+              id="capacity"
+              type="number"
+              min="0"
+              value={capacity}
+              onChange={(e) => handleChange("capacity", e.target.value)}
             />
           </div>
-        )}
-      </form>
-    </Form>
+          <div className="space-y-2">
+            <Label htmlFor="maxDistance">Distância Máxima (km)</Label>
+            <Input
+              id="maxDistance"
+              type="number"
+              min="0"
+              value={maxDistance}
+              onChange={(e) => handleChange("maxDistance", e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -34,3 +34,13 @@ export interface Supplier {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface SupplierFormData {
+  name: string;
+  email: string;
+  productionFrequency: "daily" | "weekly" | "monthly";
+  restockFrequency: "daily" | "weekly" | "monthly";
+  vehicle?: DeliveryVehicle;
+  availability?: SupplierAvailability;
+  products?: SupplierProduct[];
+}

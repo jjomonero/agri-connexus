@@ -1,119 +1,93 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { SupplierAvailability } from "@/types/supplier";
-
-const DAYS = [
-  { id: "monday", label: "Segunda" },
-  { id: "tuesday", label: "Terça" },
-  { id: "wednesday", label: "Quarta" },
-  { id: "thursday", label: "Quinta" },
-  { id: "friday", label: "Sexta" },
-  { id: "saturday", label: "Sábado" },
-  { id: "sunday", label: "Domingo" },
-];
-
-const formSchema = z.object({
-  days: z.array(z.string()),
-  hours: z.object({
-    start: z.string(),
-    end: z.string(),
-  }),
-});
 
 interface AvailabilityScheduleProps {
   initialData?: SupplierAvailability;
-  onChange: (data: SupplierAvailability) => void;
+  onChange: (availability: SupplierAvailability) => void;
 }
 
+const DAYS_OF_WEEK = [
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
+  "Domingo",
+];
+
 const AvailabilitySchedule = ({ initialData, onChange }: AvailabilityScheduleProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      days: initialData?.days || [],
-      hours: initialData?.hours || { start: "08:00", end: "18:00" },
-    },
+  const [selectedDays, setSelectedDays] = useState<string[]>(initialData?.days || []);
+  const [hours, setHours] = useState({
+    start: initialData?.hours?.start || "08:00",
+    end: initialData?.hours?.end || "18:00",
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    onChange(values);
+  const handleDayToggle = (day: string) => {
+    const updatedDays = selectedDays.includes(day)
+      ? selectedDays.filter((d) => d !== day)
+      : [...selectedDays, day];
+    
+    setSelectedDays(updatedDays);
+    onChange({
+      days: updatedDays,
+      hours,
+    });
+  };
+
+  const handleHoursChange = (type: "start" | "end", value: string) => {
+    const updatedHours = { ...hours, [type]: value };
+    setHours(updatedHours);
+    onChange({
+      days: selectedDays,
+      hours: updatedHours,
+    });
   };
 
   return (
-    <Form {...form}>
-      <form onChange={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <FormLabel>Dias Disponíveis</FormLabel>
-          <div className="grid grid-cols-4 gap-4">
-            {DAYS.map((day) => (
-              <FormField
-                key={day.id}
-                control={form.control}
-                name="days"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-x-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value?.includes(day.id)}
-                        onCheckedChange={(checked) => {
-                          const updatedDays = checked
-                            ? [...field.value, day.id]
-                            : field.value?.filter((d) => d !== day.id);
-                          field.onChange(updatedDays);
-                        }}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      {day.label}
-                    </FormLabel>
-                  </FormItem>
-                )}
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Disponibilidade para Entregas</h3>
+      
+      <div className="space-y-2">
+        <Label>Dias Disponíveis</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {DAYS_OF_WEEK.map((day) => (
+            <div key={day} className="flex items-center space-x-2">
+              <Checkbox
+                id={day}
+                checked={selectedDays.includes(day)}
+                onCheckedChange={() => handleDayToggle(day)}
               />
-            ))}
-          </div>
+              <Label htmlFor={day}>{day}</Label>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="hours.start"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Horário Inicial</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="hours.end"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Horário Final</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="startTime">Horário Inicial</Label>
+          <Input
+            id="startTime"
+            type="time"
+            value={hours.start}
+            onChange={(e) => handleHoursChange("start", e.target.value)}
           />
         </div>
-      </form>
-    </Form>
+        <div className="space-y-2">
+          <Label htmlFor="endTime">Horário Final</Label>
+          <Input
+            id="endTime"
+            type="time"
+            value={hours.end}
+            onChange={(e) => handleHoursChange("end", e.target.value)}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 
