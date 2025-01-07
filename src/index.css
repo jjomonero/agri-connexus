@@ -74,6 +74,148 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Mobile-first responsive classes */
+  .responsive-container {
+    @apply w-full px-4 md:px-6 lg:px-8;
+  }
+
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
+  }
+
+  .responsive-table {
+    @apply overflow-x-auto -mx-4 md:mx-0;
+  }
+
+  .responsive-table table {
+    @apply min-w-full;
+  }
+
+  .responsive-form {
+    @apply space-y-4 w-full max-w-lg mx-auto;
+  }
+
+  /* Mobile navigation */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border md:hidden;
+    z-index: 50;
+  }
+
+  .mobile-nav-content {
+    @apply flex justify-around items-center p-3;
+  }
+
+  /* Responsive typography */
+  h1 {
+    @apply text-2xl md:text-3xl lg:text-4xl font-bold;
+  }
+
+  h2 {
+    @apply text-xl md:text-2xl lg:text-3xl font-semibold;
+  }
+
+  h3 {
+    @apply text-lg md:text-xl lg:text-2xl font-semibold;
+  }
+
+  /* Responsive padding and margins */
+  .section-padding {
+    @apply py-4 md:py-6 lg:py-8;
+  }
+
+  .content-margin {
+    @apply my-4 md:my-6 lg:my-8;
+  }
+
+  /* Responsive dialog/modal */
+  .responsive-dialog {
+    @apply w-[90vw] max-w-lg md:w-full p-4 md:p-6;
+  }
+
+  /* Responsive sidebar */
+  .sidebar-layout {
+    @apply flex flex-col md:flex-row min-h-screen;
+  }
+
+  .sidebar {
+    @apply fixed md:relative w-full md:w-64 bg-background border-r border-border
+           transform transition-transform duration-200 ease-in-out
+           md:transform-none;
+  }
+
+  .sidebar.collapsed {
+    @apply -translate-x-full md:translate-x-0 md:w-20;
+  }
+
+  .main-content {
+    @apply flex-1 w-full md:ml-64 transition-all duration-200;
+  }
+
+  .main-content.sidebar-collapsed {
+    @apply md:ml-20;
+  }
+
+  /* Responsive cards */
+  .responsive-card {
+    @apply rounded-lg border border-border p-4 md:p-6
+           hover:shadow-md transition-shadow duration-200;
+  }
+
+  /* Responsive buttons */
+  .responsive-button {
+    @apply px-3 py-2 md:px-4 md:py-2 text-sm md:text-base
+           rounded-md transition-colors duration-200;
+  }
+
+  /* Touch-friendly elements */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+}
+
+/* Utility classes for handling long content */
+.truncate-text {
+  @apply truncate;
+}
+
+.break-words {
+  @apply break-words;
+}
+
+/* Improved touch targets for mobile */
+button, 
+a, 
+input[type="button"], 
+input[type="submit"] {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive images */
+img {
+  @apply max-w-full h-auto;
+}
+
+/* Focus styles for better accessibility */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-primary;
+}
+
+/* Better touch feedback */
+@media (hover: none) {
+  .touch-feedback:active {
+    @apply opacity-70;
   }
 }
