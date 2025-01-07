@@ -9,6 +9,7 @@ import { ContractParties } from "@/components/ui/contract/ContractParties";
 import { PaymentTerms } from "@/components/ui/contract/PaymentTerms";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Contract } from "@/types/contract";
 
 const contractSchema = z.object({
   title: z.string().min(2, {
@@ -42,9 +43,10 @@ const contractSchema = z.object({
 interface ContractFormProps {
   onClose: () => void;
   type: "buyer" | "supplier";
+  onSubmit: (data: Partial<Contract>) => Promise<void>;
 }
 
-const ContractForm = ({ onClose, type }: ContractFormProps) => {
+const ContractForm = ({ onClose, type, onSubmit }: ContractFormProps) => {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof contractSchema>>({
     resolver: zodResolver(contractSchema),
@@ -62,15 +64,13 @@ const ContractForm = ({ onClose, type }: ContractFormProps) => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof contractSchema>) => {
+  const handleSubmit = async (values: z.infer<typeof contractSchema>) => {
     try {
-      console.log("Contract data:", values);
-      
+      await onSubmit(values);
       toast({
         title: "Contrato criado com sucesso",
         description: `O contrato do tipo ${type === "buyer" ? "comprador" : "fornecedor"} foi registrado.`,
       });
-      
       onClose();
     } catch (error) {
       toast({
@@ -83,7 +83,7 @@ const ContractForm = ({ onClose, type }: ContractFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <h2 className="text-lg font-semibold">
           {type === "buyer" ? "Contrato com Comprador" : "Contrato com Fornecedor"}
         </h2>

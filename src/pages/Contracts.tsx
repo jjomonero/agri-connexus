@@ -78,7 +78,30 @@ const Contracts = () => {
   };
 
   const handleViewContract = (contract: Contract) => {
-    setSelectedContract(contract);
+    setSelectedContract({
+      id: contract.id,
+      url: `https://api.example.com/contracts/${contract.id}/pdf`, // Replace with your actual URL generation logic
+      signatures: {
+        buyer: contract.signatures?.buyerId ? {
+          name: contract.parties.find(p => p.role === "buyer")?.name || "",
+          date: contract.signatures.signedAt || ""
+        } : undefined,
+        supplier: contract.signatures?.supplierId ? {
+          name: contract.parties.find(p => p.role === "supplier")?.name || "",
+          date: contract.signatures.signedAt || ""
+        } : undefined
+      },
+      contractDetails: {
+        products: contract.products.map(p => ({
+          id: p.id,
+          name: p.name,
+          quantity: p.quantity,
+          unit: p.unit
+        })),
+        deliveryDate: contract.deliverySchedule.startDate,
+        deliveryAddress: "Address" // Add this to your Contract type if needed
+      }
+    });
   };
 
   const handleCreateContract = async (data: Partial<Contract>) => {
@@ -232,9 +255,12 @@ const Contracts = () => {
 
           {selectedContract && (
             <ContractViewer
-              contract={selectedContract}
+              contractId={Number(selectedContract.id)}
+              contractUrl={selectedContract.url}
               isOpen={!!selectedContract}
               onClose={() => setSelectedContract(null)}
+              signatures={selectedContract.signatures}
+              contractDetails={selectedContract.contractDetails}
             />
           )}
         </div>
