@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Search, Plus, Filter, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { User } from "@/types/user";
 import UserCredentialsDialog from "@/components/ui/user/UserCredentialsDialog";
 
@@ -39,13 +39,13 @@ const Users = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUserCredentials, setNewUserCredentials] = useState<{ email: string; password: string } | null>(null);
   
-  // Filter users to only show those created by the current admin
+  // Initialize users with properly typed mock data
   const [users, setUsers] = useState<User[]>([
     {
       id: "1",
       name: "John Doe",
       email: "john@example.com",
-      role: "buyer" as UserRole,
+      role: "buyer",
       status: "active",
       createdBy: currentUser?.id
     },
@@ -53,7 +53,7 @@ const Users = () => {
       id: "2",
       name: "Jane Smith",
       email: "jane@example.com",
-      role: "supplier" as UserRole,
+      role: "supplier",
       status: "active",
       createdBy: currentUser?.id
     },
@@ -97,18 +97,17 @@ const Users = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const userData = {
+    const userData: User = {
       id: editingUser?.id || String(Date.now()),
       name: formData.get("name") as string,
       email: formData.get("email") as string,
-      role: formData.get("role") as "buyer" | "supplier" | "administrator",
+      role: formData.get("role") as UserRole,
       status: formData.get("status") as "active" | "inactive",
       createdBy: currentUser?.id
     };
 
     try {
       if (!editingUser) {
-        // Generate credentials for new user
         const credentials = await createUserCredentials(userData);
         setNewUserCredentials(credentials);
         setUsers([...users, { ...userData, email: credentials.email }]);
@@ -307,5 +306,3 @@ const Users = () => {
     </div>
   );
 };
-
-export default Users;
