@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Sidebar from "@/components/ui/dashboard/Sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,14 +17,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, Filter, FileText, Download } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import ContractForm from "@/components/ui/dashboard/ContractForm";
 import ContractViewer from "@/components/ui/dashboard/ContractViewer";
 import { Contract, ContractType } from "@/types/contract";
+import { ContractActions } from "@/components/ui/contract/ContractActions";
+import { ContractSearch } from "@/components/ui/contract/ContractSearch";
 
 const Contracts = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
@@ -73,11 +76,34 @@ const Contracts = () => {
   ];
 
   const handleNewContract = (type: ContractType) => {
+    if (user?.role !== "administrator") {
+      toast({
+        title: "Acesso negado",
+        description: "Apenas administradores podem criar novos contratos.",
+        variant: "destructive",
+      });
+      return;
+    }
     setContractType(type);
     setShowForm(true);
   };
 
   const handleViewContract = (contract: Contract) => {
+    // Verifica se o usuário tem permissão para ver o contrato
+    const canViewContract = 
+      user?.role === "administrator" ||
+      (user?.role === "buyer" && contract.parties.some(p => p.role === "buyer")) ||
+      (user?.role === "supplier" && contract.parties.some(p => p.role === "supplier"));
+
+    if (!canViewContract) {
+      toast({
+        title: "Acesso negado",
+        description: "Você não tem permissão para visualizar este contrato.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSelectedContract({
       ...contract,
       signatures: {
@@ -90,6 +116,15 @@ const Contracts = () => {
   };
 
   const handleCreateContract = async (data: Partial<Contract>) => {
+    if (user?.role !== "administrator") {
+      toast({
+        title: "Acesso negado",
+        description: "Apenas administradores podem criar contratos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       // Here you would make an API call to create the contract
       console.log("Creating contract:", data);
@@ -116,37 +151,13 @@ const Contracts = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold">Contratos</h1>
-            <div className="flex gap-4">
-              <Button onClick={() => handleNewContract("buyer")} className="flex items-center gap-2">
-                <Plus className="w-4 h-4" /> Novo Contrato de Compra
-              </Button>
-              <Button onClick={() => handleNewContract("supplier")} variant="outline" className="flex items-center gap-2">
-                <Plus className="w-4 h-4" /> Novo Contrato de Fornecimento
-              </Button>
-            </div>
+            <ContractActions onNewContract={handleNewContract} />
           </div>
 
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Busca e Filtros</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Buscar contratos..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="w-4 h-4" /> Filtros
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <ContractSearch 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
 
           <Card>
             <CardContent className="p-0">
@@ -220,23 +231,25 @@ const Contracts = () => {
             </CardContent>
           </Card>
 
-          <Dialog open={showForm} onOpenChange={setShowForm}>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>
-                  {contractType === "buyer" ? "Novo Contrato de Compra" : "Novo Contrato de Fornecimento"}
-                </DialogTitle>
-                <DialogDescription>
-                  Preencha os dados do contrato para {contractType === "buyer" ? "compra" : "fornecimento"} de produtos
-                </DialogDescription>
-              </DialogHeader>
-              <ContractForm
-                type={contractType}
-                onSubmit={handleCreateContract}
-                onClose={() => setShowForm(false)}
-              />
-            </DialogContent>
-          </Dialog>
+          {user?.role === "administrator" && (
+            <Dialog open={showForm} onOpenChange={setShowForm}>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>
+                    {contractType === "buyer" ? "Novo Contrato de Compra" : "Novo Contrato de Fornecimento"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Preencha os dados do contrato para {contractType === "buyer" ? "compra" : "fornecimento"} de produtos
+                  </DialogDescription>
+                </DialogHeader>
+                <ContractForm
+                  type={contractType}
+                  onSubmit={handleCreateContract}
+                  onClose={() => setShowForm(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
 
           {selectedContract && (
             <ContractViewer
@@ -262,7 +275,7 @@ const Contracts = () => {
                   unit: p.unit
                 })),
                 deliveryDate: selectedContract.deliverySchedule.startDate,
-                deliveryAddress: "Address" // Using a default value since it's required by the interface
+                deliveryAddress: "Address"
               }}
             />
           )}
