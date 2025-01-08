@@ -14,6 +14,8 @@ interface Notification {
   icon: any;
   unread: boolean;
   forRoles: ("buyer" | "supplier" | "administrator")[];
+  createdBy?: string;
+  forUsers?: string[];
 }
 
 const Notifications = () => {
@@ -27,7 +29,8 @@ const Notifications = () => {
       time: "2 horas atrás",
       icon: FileText,
       unread: true,
-      forRoles: ["buyer", "supplier", "administrator"]
+      forRoles: ["buyer", "supplier", "administrator"],
+      forUsers: ["user-1", "user-2"]
     },
     {
       id: 2,
@@ -37,7 +40,8 @@ const Notifications = () => {
       time: "5 horas atrás",
       icon: ShoppingCart,
       unread: true,
-      forRoles: ["buyer", "supplier"]
+      forRoles: ["buyer", "supplier"],
+      forUsers: ["user-1"]
     },
     {
       id: 3,
@@ -47,7 +51,8 @@ const Notifications = () => {
       time: "1 dia atrás",
       icon: Users,
       unread: false,
-      forRoles: ["administrator"]
+      forRoles: ["administrator"],
+      createdBy: "admin-1"
     },
     {
       id: 4,
@@ -57,13 +62,23 @@ const Notifications = () => {
       time: "3 horas atrás",
       icon: DollarSign,
       unread: true,
-      forRoles: ["administrator"]
+      forRoles: ["administrator"],
+      createdBy: "admin-1"
     }
   ]);
 
-  const filteredNotifications = notifications.filter(
-    notification => notification.forRoles.includes(user?.role || "buyer")
-  );
+  const filteredNotifications = notifications.filter(notification => {
+    // Se for admin, mostrar apenas notificações que ele criou
+    if (user?.role === "administrator") {
+      return notification.createdBy === user.id || notification.forRoles.includes("administrator");
+    }
+    
+    // Para outros usuários, mostrar apenas notificações destinadas a eles
+    return (
+      notification.forRoles.includes(user?.role || "buyer") &&
+      (!notification.forUsers || notification.forUsers.includes(user?.id || ""))
+    );
+  });
 
   const markAllAsRead = () => {
     setNotifications(notifications.map(notification => ({

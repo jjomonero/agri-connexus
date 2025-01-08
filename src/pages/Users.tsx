@@ -26,23 +26,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Plus, Filter, Edit, Trash2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "buyer" | "supplier" | "administrator";
-  status: "active" | "inactive";
-}
+import { User } from "@/types/user";
+import UserCredentialsDialog from "@/components/ui/user/UserCredentialsDialog";
 
 const Users = () => {
   const { toast } = useToast();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, createUserCredentials } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [newUserCredentials, setNewUserCredentials] = useState<{ email: string; password: string } | null>(null);
+  
+  // Filter users to only show those created by the current admin
   const [users, setUsers] = useState<User[]>([
     {
       id: "1",
@@ -50,6 +47,7 @@ const Users = () => {
       email: "john@example.com",
       role: "buyer",
       status: "active",
+      createdBy: currentUser?.id
     },
     {
       id: "2",
@@ -57,8 +55,9 @@ const Users = () => {
       email: "jane@example.com",
       role: "supplier",
       status: "active",
+      createdBy: currentUser?.id
     },
-  ]);
+  ].filter(user => user.createdBy === currentUser?.id));
 
   const handleNewUser = () => {
     setEditingUser(null);
@@ -66,11 +65,28 @@ const Users = () => {
   };
 
   const handleEditUser = (user: User) => {
+    if (user.createdBy !== currentUser?.id) {
+      toast({
+        title: "Acesso negado",
+        description: "Você só pode editar usuários que você criou.",
+        variant: "destructive",
+      });
+      return;
+    }
     setEditingUser(user);
     setShowForm(true);
   };
 
   const handleDeleteUser = (userId: string) => {
+    const userToDelete = users.find(u => u.id === userId);
+    if (userToDelete?.createdBy !== currentUser?.id) {
+      toast({
+        title: "Acesso negado",
+        description: "Você só pode deletar usuários que você criou.",
+        variant: "destructive",
+      });
+      return;
+    }
     setUsers(users.filter(user => user.id !== userId));
     toast({
       title: "Usuário excluído",
@@ -78,7 +94,7 @@ const Users = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const userData = {
@@ -87,22 +103,33 @@ const Users = () => {
       email: formData.get("email") as string,
       role: formData.get("role") as "buyer" | "supplier" | "administrator",
       status: formData.get("status") as "active" | "inactive",
+      createdBy: currentUser?.id
     };
 
-    if (editingUser) {
-      setUsers(users.map(user => user.id === editingUser.id ? userData : user));
+    try {
+      if (!editingUser) {
+        // Generate credentials for new user
+        const credentials = await createUserCredentials(userData);
+        setNewUserCredentials(credentials);
+        setUsers([...users, { ...userData, email: credentials.email }]);
+      } else {
+        setUsers(users.map(user => user.id === editingUser.id ? userData : user));
+      }
+
+      setShowForm(false);
       toast({
-        title: "Usuário atualizado",
-        description: "As informações do usuário foram atualizadas com sucesso.",
+        title: editingUser ? "Usuário atualizado" : "Usuário criado",
+        description: editingUser 
+          ? "As informações do usuário foram atualizadas com sucesso."
+          : "O novo usuário foi criado com sucesso.",
       });
-    } else {
-      setUsers([...users, userData]);
+    } catch (error) {
       toast({
-        title: "Usuário criado",
-        description: "O novo usuário foi criado com sucesso.",
+        title: "Erro",
+        description: "Ocorreu um erro ao processar a solicitação.",
+        variant: "destructive",
       });
     }
-    setShowForm(false);
   };
 
   if (currentUser?.role !== "administrator") {
@@ -244,7 +271,6 @@ const Users = () => {
                     <SelectContent>
                       <SelectItem value="buyer">Comprador</SelectItem>
                       <SelectItem value="supplier">Fornecedor</SelectItem>
-                      <SelectItem value="administrator">Administrador</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -268,6 +294,14 @@ const Users = () => {
               </form>
             </DialogContent>
           </Dialog>
+
+          {newUserCredentials && (
+            <UserCredentialsDialog
+              isOpen={!!newUserCredentials}
+              onClose={() => setNewUserCredentials(null)}
+              credentials={newUserCredentials}
+            />
+          )}
         </div>
       </main>
     </div>
