@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState } from "react";
-import { User, UserRole } from "@/types/user";
+import { User } from "@/types/user";
 import { useToast } from "@/hooks/use-toast";
+
+export type UserRole = "supplier" | "buyer" | "administrator";
 
 interface AuthContextType {
   user: User | null;
@@ -33,8 +35,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const password = generatePassword();
     
-    // Here you would typically make an API call to create the user
-    // For now, we'll just return the credentials
     return {
       email: userData.email,
       password: password
@@ -48,9 +48,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         id: "1",
         name: "User",
         email: email,
-        role: "buyer" as UserRole,
+        role: "buyer",
         status: "active",
-        createdBy: "admin-1" // This would come from the backend
+        createdBy: "admin-1"
       };
       
       setUser(mockUser);

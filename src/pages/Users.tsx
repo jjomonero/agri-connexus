@@ -45,7 +45,7 @@ const Users = () => {
       id: "1",
       name: "John Doe",
       email: "john@example.com",
-      role: "buyer",
+      role: "buyer" as UserRole,
       status: "active",
       createdBy: currentUser?.id
     },
@@ -53,7 +53,7 @@ const Users = () => {
       id: "2",
       name: "Jane Smith",
       email: "jane@example.com",
-      role: "supplier",
+      role: "supplier" as UserRole,
       status: "active",
       createdBy: currentUser?.id
     },
