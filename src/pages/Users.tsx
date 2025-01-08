@@ -3,33 +3,13 @@ import Sidebar from "@/components/ui/dashboard/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, Plus, Filter, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { User } from "@/types/user";
 import UserCredentialsDialog from "@/components/ui/user/UserCredentialsDialog";
+import UserTable from "@/components/ui/user/UserTable";
+import UserForm from "@/components/ui/user/UserForm";
 
 const Users = () => {
   const { toast } = useToast();
@@ -39,7 +19,6 @@ const Users = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUserCredentials, setNewUserCredentials] = useState<{ email: string; password: string } | null>(null);
   
-  // Initialize users with properly typed mock data
   const [users, setUsers] = useState<User[]>([
     {
       id: "1",
@@ -178,121 +157,20 @@ const Users = () => {
 
           <Card>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Função</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        {user.role === "buyer" && "Comprador"}
-                        {user.role === "supplier" && "Fornecedor"}
-                        {user.role === "administrator" && "Administrador"}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            user.status === "active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {user.status === "active" ? "Ativo" : "Inativo"}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditUser(user)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteUser(user.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <UserTable 
+                users={users}
+                onEdit={handleEditUser}
+                onDelete={handleDeleteUser}
+              />
             </CardContent>
           </Card>
 
-          <Dialog open={showForm} onOpenChange={setShowForm}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editingUser ? "Editar Usuário" : "Novo Usuário"}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="name">Nome</label>
-                  <Input
-                    id="name"
-                    name="name"
-                    defaultValue={editingUser?.name}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="email">Email</label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    defaultValue={editingUser?.email}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="role">Função</label>
-                  <Select name="role" defaultValue={editingUser?.role || "buyer"}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma função" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="buyer">Comprador</SelectItem>
-                      <SelectItem value="supplier">Fornecedor</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="status">Status</label>
-                  <Select name="status" defaultValue={editingUser?.status || "active"}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Ativo</SelectItem>
-                      <SelectItem value="inactive">Inativo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">
-                    {editingUser ? "Salvar" : "Criar"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <UserForm
+            open={showForm}
+            onOpenChange={setShowForm}
+            onSubmit={handleSubmit}
+            editingUser={editingUser}
+          />
 
           {newUserCredentials && (
             <UserCredentialsDialog
@@ -306,3 +184,5 @@ const Users = () => {
     </div>
   );
 };
+
+export default Users;
